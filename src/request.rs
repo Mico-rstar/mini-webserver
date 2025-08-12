@@ -6,7 +6,7 @@ use std::io::BufReader;
 
 #[derive(Debug)]
 pub struct Request {
-    header: Header<String>,
+    header: Header,
     body: Body,
 }
 
@@ -43,11 +43,12 @@ impl Request {
         }
     }
 
-    pub fn header(&self) -> &Header<String> {
+    pub fn header(&self) -> &Header {
         &self.header
     }
 
     pub fn body(&self) -> &Body {
         &self.body
     }
+
 }

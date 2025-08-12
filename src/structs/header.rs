@@ -2,19 +2,15 @@ use std::collections::HashMap;
 use std::iter::FromIterator;
 
 #[derive(Debug, Default, Clone)]
-pub struct Header<T> {
-    header: HashMap<T, T>,
+pub struct Header {
+    header: HashMap<String, String>,
 }
 
-impl<T> Header<T> {
-    pub fn from(map: HashMap<T, T>) -> Self {
-        Header { header: map }
-    }
-}
+
 
 // 实现 FromIterator 用于 collect()
-impl<T: Eq + std::hash::Hash> FromIterator<(T, T)> for Header<T> {
-    fn from_iter<I: IntoIterator<Item = (T, T)>>(iter: I) -> Self {
+impl FromIterator<(String, String)> for Header {
+    fn from_iter<I: IntoIterator<Item = (String, String)>>(iter: I) -> Self {
         Header {
             header: iter.into_iter().collect(),
         }
@@ -23,12 +19,20 @@ impl<T: Eq + std::hash::Hash> FromIterator<(T, T)> for Header<T> {
 
 
 // 实现 IntoIterator 以支持迭代
-impl<T> IntoIterator for Header<T> {
-    type Item = (T, T);
-    type IntoIter = std::collections::hash_map::IntoIter<T, T>;
+impl IntoIterator for Header {
+    type Item = (String, String);
+    type IntoIter = std::collections::hash_map::IntoIter<String, String>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.header.into_iter()
     }
 }
 
+
+impl Header {
+    pub fn from(map: HashMap<String, String>) -> Self {
+        Header { header: map }
+    }
+
+
+}
