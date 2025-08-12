@@ -1,4 +1,4 @@
-pub enum Contype {
+pub enum ContentType {
     FORM,     // application/x-www-form-urlencoded
     FORMDATA(String), // multipart/form-data
     JSON,     // application/json
@@ -7,15 +7,15 @@ pub enum Contype {
     STREAM,   //application/octet-stream
 }
 
-impl Contype {
+impl ContentType {
     pub fn to_string(&self) -> String {
         match self {
-            Contype::FORM => String::from("application/x-www-form-urlencoded"),
-            Contype::FORMDATA(boundary) => format!("multipart/form-data; boundary={}", boundary),
-            Contype::JSON => String::from("application/json"),
-            Contype::XML => String::from("text/xml"),
-            Contype::TEXT => String::from("text/plain"),
-            Contype::STREAM => String::from("application/octet-stream"),
+            ContentType::FORM => String::from("application/x-www-form-urlencoded"),
+            ContentType::FORMDATA(boundary) => format!("multipart/form-data; boundary={}", boundary),
+            ContentType::JSON => String::from("application/json"),
+            ContentType::XML => String::from("text/xml"),
+            ContentType::TEXT => String::from("text/plain"),
+            ContentType::STREAM => String::from("application/octet-stream"),
         }
     }
 }
