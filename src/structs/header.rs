@@ -1,6 +1,16 @@
 use std::collections::HashMap;
 use std::iter::FromIterator;
 
+use crate::structs::content_type::ContentType;
+
+
+#[derive(Debug, thiserror::Error)]
+pub enum MissArgsError {    
+    #[error("Missing Content-Type in header")]
+    MissingContentType,
+}
+
+
 #[derive(Debug, Default, Clone)]
 pub struct Header {
     header: HashMap<String, String>,
@@ -34,5 +44,12 @@ impl Header {
         Header { header: map }
     }
 
-
+    pub fn try_get_type(&self) -> Result<ContentType, Box<dyn std::error::Error>> {
+        if let Some(ctype) = self.header.get("Content-Type")
+        {
+            ContentType::try_from(ctype).map_err(|e| e.into())
+        } else {
+            Err(MissArgsError::MissingContentType.into())
+        }
+    }
 }

@@ -12,7 +12,9 @@ fn main() {
     for stream in listener.incoming() {
         match stream {
             Ok(mut stream) => {
-                handle_connection(&mut stream);
+                if let Err(e) = handle_connection(&mut stream) {
+                    eprintln!("{e}");
+                } 
             }
             Err(e) => {
                 println!("{e}");
@@ -21,10 +23,9 @@ fn main() {
     }
 }
 
-fn handle_connection(stream: &mut TcpStream) {
-    let req = request::Request::from_stream(stream);
-
+fn handle_connection(stream: &mut TcpStream) -> Result<(), Box<dyn std::error::Error>>{
+    let req = request::Request::from_stream(stream)?;
     println!("{:#?}", req.header());
     println!("{:#?}", req.body());
-    
+    Ok(())
 }
