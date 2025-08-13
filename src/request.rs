@@ -4,6 +4,7 @@ use crate::structs::header::Header;
 use std::collections::HashMap;
 use std::io::BufRead;
 use std::io::BufReader;
+use std::io::Read;
 
 #[derive(Debug)]
 pub struct Request {
@@ -13,28 +14,40 @@ pub struct Request {
 
 impl Request {
     // 从流中构建
-    pub fn from_stream(stream: impl std::io::Read) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn from_stream(
+        stream: &mut impl std::io::Read,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
         let mut buf_reader = BufReader::new(stream);
 
         // 收集 header（直到第一个空行）
-        let header = Self::header_build(&mut buf_reader);
-
-        let header = Header::from(header);
+        let header_map = Self::header_build(&mut buf_reader);
+        let content_length = header_map
+            .get("Content-Length")
+            .and_then(|v| v.parse::<u64>().ok())
+            .unwrap_or(0);
+        let header = Header::from(header_map);
 
         // 剩余部分作为 body
-        let ct = header.try_get_type()?;
-
-        let body = Self::body_build(&mut buf_reader, ct)?;
-
-        Ok(Request {
-            header: header,
-            body: body,
-        })
+        if let Ok(ct) = header.try_get_type() {
+            let body = Self::body_build(&mut buf_reader, ct, content_length)?;
+            Ok(Request {
+                header: header,
+                body: body,
+            })
+        } else {
+            // 缺少Content-Type字段
+            // 认为不存在body
+            Ok(Request {
+                header: header,
+                body: Body::None,
+            })
+        }
     }
 
     fn body_build(
         reader: &mut impl std::io::Read,
         ct: ContentType,
+        len: u64,
     ) -> Result<Body, Box<dyn std::error::Error>> {
         if ct == ContentType::JSON
             || ct == ContentType::FORM
@@ -42,12 +55,11 @@ impl Request {
             || ct == ContentType::TEXT
         {
             let mut data = String::new();
-            _ = reader.read_to_string(&mut data)?;
+            reader.take(len).read_to_string(&mut data)?;
             Ok(Body::Text(data))
-
         } else {
             let mut data = Vec::new();
-            _ = reader.read_to_end(&mut data)?;
+            reader.take(len).read_to_end(&mut data)?;
             Ok(Body::Binary(data))
         }
     }
