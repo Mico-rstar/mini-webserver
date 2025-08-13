@@ -40,6 +40,10 @@ impl IntoIterator for Header {
 
 
 impl Header {
+    pub fn new() -> Self {
+        Header { header: HashMap::new() }
+    }
+
     pub fn from(map: HashMap<String, String>) -> Self {
         Header { header: map }
     }
@@ -51,5 +55,18 @@ impl Header {
         } else {
             Err(MissArgsError::MissingContentType.into())
         }
+    }
+
+    pub fn set(&mut self, key: String, value: String) -> &mut Self{
+        self.header.insert(key, value);
+        self
+    }
+
+    pub fn to_string(&self) -> String {
+        self.header
+        .iter()
+        .map(|(key, value)| format!("{}: {}", key, value))
+        .collect::<Vec<_>>()
+        .join("\r\n")
     }
 }
