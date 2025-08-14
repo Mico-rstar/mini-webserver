@@ -46,3 +46,9 @@ impl FromStr for RequestLine {
         })
     }
 }
+
+impl std::fmt::Display for RequestLine {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {}, {})", self.method, self.uri, self.version)
+    }
+}
