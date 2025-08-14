@@ -2,17 +2,18 @@ use std::io::Write;
 use std::net::TcpListener;
 use std::net::TcpStream;
 
-use tracing::{info, Level};
+use tracing::{info, error, Level};
 use tracing_subscriber::FmtSubscriber;
 
 mod structs;
 mod request;
 mod response;
 mod router;
-mod api;
+mod handler;
 
 use crate::router::Router;
-use crate::api::test_api::TestAPI;
+use crate::handler::api_handler::test_api::TestAPI;
+use crate::handler::static_handler::root_resources::RootResourcesHandler;
 
 
 fn main() {
@@ -39,7 +40,7 @@ fn main() {
                 } 
             }
             Err(e) => {
-                println!("{e}");
+                error!("{e}");
             }
         }
     }
@@ -47,9 +48,15 @@ fn main() {
 
 fn router_init() -> Router {
     let mut router = Router::new();
+    // API routes should be registered before the catch-all static handler.
     router.add_route("/api/test", TestAPI);
+
+    // Add the static file handler as a catch-all route.
+    router.add_route("/*path", RootResourcesHandler);
     router
 }
+
+
 
 fn handle_connection(stream: &mut TcpStream, router: &Router) -> Result<(), Box<dyn std::error::Error>> {
     let req = request::Request::from_stream(stream)?;
