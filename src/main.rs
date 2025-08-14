@@ -1,8 +1,9 @@
 use std::io::Write;
 use std::net::TcpListener;
 use std::net::TcpStream;
+use std::fs;
 
-use tracing::{info, Level};
+use tracing::{info, error, Level};
 use tracing_subscriber::FmtSubscriber;
 
 mod structs;
@@ -39,7 +40,7 @@ fn main() {
                 } 
             }
             Err(e) => {
-                println!("{e}");
+                error!("{e}");
             }
         }
     }
@@ -50,6 +51,8 @@ fn router_init() -> Router {
     router.add_route("/api/test", TestAPI);
     router
 }
+
+
 
 fn handle_connection(stream: &mut TcpStream, router: &Router) -> Result<(), Box<dyn std::error::Error>> {
     let req = request::Request::from_stream(stream)?;
