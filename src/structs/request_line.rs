@@ -19,8 +19,6 @@ pub enum RequestLineError {
     InvalidFormat,
     #[error("Invalid HTTP method: {0}")]
     InvalidMethod(#[from] MethodError),
-    #[error("Invalid HTTP version")]
-    InvalidVersion,
 }
 
 impl FromStr for RequestLine {
