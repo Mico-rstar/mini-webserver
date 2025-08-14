@@ -57,6 +57,10 @@ impl Header {
         }
     }
 
+    pub fn get(&self, key: &str) -> Option<&String> {
+        self.header.get(key)
+    }
+
     pub fn set(&mut self, key: String, value: String) -> &mut Self{
         self.header.insert(key, value);
         self
