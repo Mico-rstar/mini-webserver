@@ -5,7 +5,7 @@ use std::net::TcpStream;
 use crate::structs::body::Body;
 use crate::structs::content_type::ContentType;
 use crate::structs::status::Status;
-use tracing::{info, debug, Level};
+use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
 mod structs;
