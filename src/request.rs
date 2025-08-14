@@ -52,7 +52,7 @@ impl Request {
 
     fn request_line_build(reader: &mut impl BufRead) -> Result<RequestLine, Box<dyn std::error::Error>> {
         let mut buf = String::new();
-        reader.read_line(&mut buf);
+        let _ = reader.read_line(&mut buf)?;
         let rl = RequestLine::from_str(&buf)?;
         Ok(rl)
     }
@@ -101,5 +101,9 @@ impl Request {
 
     pub fn body(&self) -> &Body {
         &self.body
+    }
+
+    pub fn request_line(&self) -> &RequestLine {
+        &self.request_line
     }
 }
