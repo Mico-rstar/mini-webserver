@@ -30,6 +30,13 @@ impl Response {
         }
     }
 
+    // 设置响应体
+    pub fn set_body(&mut self, _body: Body) {
+        self.body = _body;
+        // 设置请求头Content-Length字段
+        self.header.set("Content-Length".to_string(), self.body.len().to_string());
+    }
+
     pub fn as_bytes(&self) -> Vec<u8> {
         let mut response_bytes = Vec::new();
 
