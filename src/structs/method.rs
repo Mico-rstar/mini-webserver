@@ -1,5 +1,7 @@
 use std::str::FromStr;
+use std::string::ToString;
 use thiserror::Error;
+use std::fmt;
 
 #[derive(Debug, PartialEq)]
 pub enum Method {
@@ -20,6 +22,7 @@ pub enum MethodError {
     InvalidMethod,
 }
 
+
 impl FromStr for Method {
     type Err = MethodError;
 
@@ -36,5 +39,24 @@ impl FromStr for Method {
             "PATCH" => Ok(Method::PATCH),
             _ => Err(MethodError::InvalidMethod),
         }
+    }
+
+    
+}
+
+impl fmt::Display for Method {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let method_str = match self {
+            Method::GET => "GET",
+            Method::POST => "POST",
+            Method::PUT => "PUT",
+            Method::DELETE => "DELETE",
+            Method::HEAD => "HEAD",
+            Method::OPTIONS => "OPTIONS",
+            Method::CONNECT => "CONNECT",
+            Method::TRACE => "TRACE",
+            Method::PATCH => "PATCH",
+        };
+        write!(f, "{}", method_str)
     }
 }
