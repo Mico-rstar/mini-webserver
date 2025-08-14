@@ -13,6 +13,7 @@ pub enum ContentType {
     FORMDATA(String), // multipart/form-data
     JSON,     // application/json
     XML,      // text/xml
+    HTML,     // text/html
     TEXT,     // text/plain
     STREAM,   //application/octet-stream
 }
@@ -26,6 +27,7 @@ impl ContentType {
             Self::XML => String::from("text/xml"),
             Self::TEXT => String::from("text/plain"),
             Self::STREAM => String::from("application/octet-stream"),
+            Self::HTML => String::from("text/html"),
         }
     }
 
@@ -38,6 +40,7 @@ impl ContentType {
             "text/xml" => Ok(Self::XML),
             "text/plain" => Ok(Self::TEXT),
             "application/octet-stream" => Ok(Self::STREAM),
+            "text/html" => Ok(Self::HTML),
             s if s.starts_with("multipart/form-data") => {
                 Self::parse_form_data(s).ok_or(ContentTypeError::MissingBoundary)
             },
