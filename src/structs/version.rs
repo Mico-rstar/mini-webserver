@@ -5,27 +5,30 @@ pub enum HttpVersion {
     Http1_1,  // HTTP/1.1
     Http2,    // HTTP/2
     Http3,    // HTTP/3
+    Unknown,
 }
 
 impl HttpVersion {
     /// 从字符串解析 HTTP 版本（如 "HTTP/1.1" -> `HttpVersion::Http1_1`）
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn from_str(s: &str) -> Self {
         match s.to_uppercase().as_str() {
-            "HTTP/1.0" => Some(HttpVersion::Http1_0),
-            "HTTP/1.1" => Some(HttpVersion::Http1_1),
-            "HTTP/2"   => Some(HttpVersion::Http2),
-            "HTTP/3"   => Some(HttpVersion::Http3),
-            _ => None,
+            "HTTP/1.0" => Self::Http1_0,
+            "HTTP/1.1" => Self::Http1_1,
+            "HTTP/2"   => Self::Http2,
+            "HTTP/3"   => Self::Http3,
+            _ => Self::Unknown,
         }
     }
 
     /// 转换为标准格式的字符串（如 `HttpVersion::Http1_1` -> "HTTP/1.1"）
     pub fn to_string(&self) -> String {
         match self {
-            HttpVersion::Http1_0 => "HTTP/1.0".to_string(),
-            HttpVersion::Http1_1 => "HTTP/1.1".to_string(),
-            HttpVersion::Http2   => "HTTP/2".to_string(),
-            HttpVersion::Http3   => "HTTP/3".to_string(),
+            Self::Http1_0 => "HTTP/1.0".to_string(),
+            Self::Http1_1 => "HTTP/1.1".to_string(),
+            Self::Http2   => "HTTP/2".to_string(),
+            Self::Http3   => "HTTP/3".to_string(),
+            Self::Unknown => "Unknown version".to_string(),
+
         }
     }
 }
@@ -37,12 +40,3 @@ impl std::fmt::Display for HttpVersion {
     }
 }
 
-/// 从 `&str` 自动解析为 `HttpVersion`（通过 `?` 操作符）
-impl TryFrom<&str> for HttpVersion {
-    type Error = String;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        HttpVersion::from_str(value)
-            .ok_or_else(|| format!("Invalid HTTP version: {}", value))
-    }
-}
