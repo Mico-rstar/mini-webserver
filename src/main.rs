@@ -1,11 +1,12 @@
 use std::io::Write;
 use std::net::TcpListener;
 use std::net::TcpStream;
+use std::fs;
 
 use crate::structs::body::Body;
 use crate::structs::content_type::ContentType;
 use crate::structs::status::Status;
-use tracing::{info, Level};
+use tracing::{info, error, Level};
 use tracing_subscriber::FmtSubscriber;
 
 mod structs;
@@ -30,11 +31,11 @@ fn main() {
         match stream {
             Ok(mut stream) => {
                 if let Err(e) = handle_connection(&mut stream) {
-                    eprintln!("{e}");
+                    error!("{e}");
                 } 
             }
             Err(e) => {
-                println!("{e}");
+                error!("{e}");
             }
         }
     }
@@ -46,8 +47,10 @@ fn handle_connection(stream: &mut TcpStream) -> Result<(), Box<dyn std::error::E
     info!("Connection from {}: {}", req.header().get("Host").unwrap_or(&"unknown host".to_string()), req.request_line());
 
     // 构造响应报文
-    let mut res = response::Response::new("mini-webserver/localhost", Status::Ok, ContentType::TEXT);
-    res.set_body(Body::Text("hello world".to_string()));
+    let mut res = response::Response::new("mini-webserver/localhost", Status::Ok, ContentType::HTML);
+    let content = fs::read_to_string("./resources/index.html").unwrap(); 
+    res.set_body(Body::Text(content));
+    // info!("{:#?}", res);
     stream.write_all(res.as_bytes().as_slice())?;
 
     Ok(())
