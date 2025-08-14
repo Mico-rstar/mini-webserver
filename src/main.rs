@@ -43,7 +43,7 @@ fn main() {
 fn handle_connection(stream: &mut TcpStream) -> Result<(), Box<dyn std::error::Error>>{
     let req = request::Request::from_stream(stream)?;
 
-    info!("Connection from {}", req.header().get("Host").unwrap_or(&"unknown host".to_string()));
+    info!("Connection from {}: {}", req.header().get("Host").unwrap_or(&"unknown host".to_string()), req.request_line());
 
     // 构造响应报文
     let mut res = response::Response::new("mini-webserver/localhost", Status::Ok, ContentType::TEXT);
