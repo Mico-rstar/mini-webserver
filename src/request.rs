@@ -1,13 +1,16 @@
 use crate::structs::body::Body;
 use crate::structs::content_type::ContentType;
 use crate::structs::header::Header;
+use crate::structs::request_line::RequestLine;
 use std::collections::HashMap;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
+use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct Request {
+    request_line: RequestLine,
     header: Header,
     body: Body,
 }
@@ -19,6 +22,7 @@ impl Request {
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let mut buf_reader = BufReader::new(stream);
 
+        let rl = Self::request_line_build(&mut buf_reader)?;
         // 收集 header（直到第一个空行）
         let header_map = Self::header_build(&mut buf_reader);
         let content_length = header_map
@@ -31,6 +35,7 @@ impl Request {
         if let Ok(ct) = header.try_get_type() {
             let body = Self::body_build(&mut buf_reader, ct, content_length)?;
             Ok(Request {
+                request_line: rl,
                 header: header,
                 body: body,
             })
@@ -38,10 +43,18 @@ impl Request {
             // 缺少Content-Type字段
             // 认为不存在body
             Ok(Request {
+                request_line: rl,
                 header: header,
                 body: Body::None,
             })
         }
+    }
+
+    fn request_line_build(reader: &mut impl BufRead) -> Result<RequestLine, Box<dyn std::error::Error>> {
+        let mut buf = String::new();
+        reader.read_line(&mut buf);
+        let rl = RequestLine::from_str(&buf)?;
+        Ok(rl)
     }
 
     fn body_build(
