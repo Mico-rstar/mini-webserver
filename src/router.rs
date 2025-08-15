@@ -1,17 +1,18 @@
 use crate::request::Request;
+use crate::response::Response;
 use matchit::Params;
 
 // 定义处理程序特征
 pub trait Handler {
-    fn handle(&self, request: &Request, params: Params) -> String;
+    fn handle(&self, request: &Request, params: Params) -> Result<Response, Box<dyn std::error::Error>>;
 }
 
 // 为闭包实现Handler（支持状态捕获）
 impl<F> Handler for F
 where
-    F: Fn(&Request, Params) -> String,
+    F: Fn(&Request, Params) -> Result<Response, Box<dyn std::error::Error>>,
 {
-    fn handle(&self, request: &Request, params: Params) -> String {
+    fn handle(&self, request: &Request, params: Params) -> Result<Response, Box<dyn std::error::Error>> {
         self(request, params)
     }
 }
@@ -40,10 +41,10 @@ impl Router {
     }
 
     // 处理请求并返回响应
-    pub fn handle_request(&self, request: &Request) -> Result<String, String> {
+    pub fn handle_request(&self, request: &Request) -> Result<Response, Box<dyn std::error::Error>> {
         match self.routes.at(&request.request_line().uri) {
-            Ok(matched) => Ok(matched.value.handle(request, matched.params)),
-            Err(e) => Err(format!("Route not found: {e}")),
+            Ok(matched) => matched.value.handle(request, matched.params),
+            Err(e) => Err(Box::new(std::io::Error::new(std::io::ErrorKind::NotFound, format!("Route not found: {e}")))),
         }
     }
 }
