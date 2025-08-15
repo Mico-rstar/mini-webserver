@@ -1,18 +1,18 @@
+use crate::request::Request;
 use matchit::Params;
-use std::collections::HashMap;
 
 // 定义处理程序特征
-trait Handler {
-    fn handle(&self, params: Params) -> String;
+pub trait Handler {
+    fn handle(&self, request: &Request, params: Params) -> String;
 }
 
 // 为闭包实现Handler（支持状态捕获）
 impl<F> Handler for F
 where
-    F: Fn(Params) -> String,
+    F: Fn(&Request, Params) -> String,
 {
-    fn handle(&self, params: Params) -> String {
-        self(params)
+    fn handle(&self, request: &Request, params: Params) -> String {
+        self(request, params)
     }
 }
 
@@ -20,7 +20,7 @@ where
 type BoxedHandler = Box<dyn Handler + Send + Sync>;
 
 // 路由器结构体
-struct Router {
+pub struct Router {
     // 使用matchit进行路径匹配
     routes: matchit::Router<BoxedHandler>,
 }
@@ -40,11 +40,10 @@ impl Router {
     }
 
     // 处理请求并返回响应
-    pub fn handle_request(&self, path: &str) -> Result<String, String> {
-        match self.routes.at(path) {
-            Ok(matched) => Ok(matched.value.handle(matched.params)),
+    pub fn handle_request(&self, request: &Request) -> Result<String, String> {
+        match self.routes.at(&request.request_line().uri) {
+            Ok(matched) => Ok(matched.value.handle(request, matched.params)),
             Err(e) => Err(format!("Route not found: {e}")),
         }
     }
 }
-
