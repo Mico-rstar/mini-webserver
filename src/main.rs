@@ -12,7 +12,10 @@ mod structs;
 mod request;
 mod response;
 mod router;
+mod api;
 
+use crate::router::Router;
+use crate::api::test_api::TestAPI;
 
 
 fn main() {
@@ -30,7 +33,7 @@ fn main() {
     for stream in listener.incoming() {
         match stream {
             Ok(mut stream) => {
-                if let Err(e) = handle_connection(&mut stream) {
+                if let Err(e) = test_router(&mut stream) {
                     eprintln!("{e}");
                 } 
             }
@@ -41,14 +44,15 @@ fn main() {
     }
 }
 
-fn handle_connection(stream: &mut TcpStream) -> Result<(), Box<dyn std::error::Error>>{
+fn test_router(stream: &mut TcpStream) -> Result<(), Box<dyn std::error::Error>> {
     let req = request::Request::from_stream(stream)?;
 
     info!("Connection from {}: {}", req.header().get("Host").unwrap_or(&"unknown host".to_string()), req.request_line());
 
-    // 构造响应报文
-    let mut res = response::Response::new("mini-webserver/localhost", Status::Ok, ContentType::TEXT);
-    res.set_body(Body::Text("hello world".to_string()));
+    let mut router = Router::new();
+    router.add_route("/api/test", TestAPI);
+
+    let res = router.handle_request(&req)?;
     stream.write_all(res.as_bytes().as_slice())?;
 
     Ok(())
