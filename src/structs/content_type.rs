@@ -7,7 +7,7 @@ pub enum ContentTypeError {
     MissingBoundary,
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub enum ContentType {
     FORM,     // application/x-www-form-urlencoded
     FORMDATA(String), // multipart/form-data
@@ -16,6 +16,12 @@ pub enum ContentType {
     HTML,     // text/html
     TEXT,     // text/plain
     STREAM,   //application/octet-stream
+    CSS,
+    JS,
+    PNG,
+    JPEG,
+    GIF,
+    ICO,
 }
 
 impl ContentType {
@@ -28,6 +34,12 @@ impl ContentType {
             Self::TEXT => String::from("text/plain"),
             Self::STREAM => String::from("application/octet-stream"),
             Self::HTML => String::from("text/html"),
+            Self::CSS => String::from("text/css"),
+            Self::JS => String::from("application/javascript"),
+            Self::PNG => String::from("image/png"),
+            Self::JPEG => String::from("image/jpeg"),
+            Self::GIF => String::from("image/gif"),
+            Self::ICO => String::from("image/x-icon"),
         }
     }
 
@@ -41,6 +53,12 @@ impl ContentType {
             "text/plain" => Ok(Self::TEXT),
             "application/octet-stream" => Ok(Self::STREAM),
             "text/html" => Ok(Self::HTML),
+            "text/css" => Ok(Self::CSS),
+            "application/javascript" => Ok(Self::JS),
+            "image/png" => Ok(Self::PNG),
+            "image/jpeg" => Ok(Self::JPEG),
+            "image/gif" => Ok(Self::GIF),
+            "image/x-icon" => Ok(Self::ICO),
             s if s.starts_with("multipart/form-data") => {
                 Self::parse_form_data(s).ok_or(ContentTypeError::MissingBoundary)
             },
@@ -59,7 +77,7 @@ impl ContentType {
         // 提取 boundary
         parts.find_map(|part| {
             part.strip_prefix("boundary=")
-                .map(|boundary| Self::FORMDATA(boundary.trim_matches(|c| c == '"' || c == '\'').to_string()))
+                .map(|boundary| Self::FORMDATA(boundary.trim_matches(|c| c == '"' || c == '\'' ).to_string()))
         })
     }
 }
