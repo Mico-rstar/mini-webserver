@@ -22,6 +22,7 @@ impl Response {
         h
     }
 
+    // 手动构建响应头接口
     pub fn new(host: &str, status: Status, ctype: ContentType) -> Self {
         Response {
             status_line: StatusLine::new(HttpVersion::Http1_1, status),
@@ -59,5 +60,56 @@ impl Response {
         }
 
         response_bytes
+    }
+}
+
+// A trait for building standard HTTP responses easily.
+pub trait ResponseBuilder {
+    /// Creates a 200 OK response.
+    fn success(host: &str, ctype: ContentType, body: Body) -> Self;
+
+    /// Creates a 400 Bad Request response with a default HTML body.
+    fn bad_request(host: &str) -> Self;
+
+    /// Creates a 403 Forbidden response with a default HTML body.
+    fn forbidden(host: &str) -> Self;
+
+    /// Creates a 404 Not Found response with a default HTML body.
+    fn not_found(host: &str) -> Self;
+
+    /// Creates a 500 Internal Server Error response with a default HTML body.
+    fn internal_server_error(host: &str) -> Self;
+}
+
+// Implementation of the builder trait for our Response struct.
+impl ResponseBuilder for Response {
+    fn success(host: &str, ctype: ContentType, body: Body) -> Self {
+        let mut response = Response::new(host, Status::Ok, ctype);
+        response.set_body(body);
+        response
+    }
+
+    fn bad_request(host: &str) -> Self {
+        let mut response = Response::new(host, Status::BadRequest, ContentType::HTML);
+        response.set_body(Body::Text("<h1>400 Bad Request</h1>".to_string()));
+        response
+    }
+
+    fn forbidden(host: &str) -> Self {
+        let mut response = Response::new(host, Status::Forbidden, ContentType::HTML);
+        response.set_body(Body::Text("<h1>403 Forbidden</h1>".to_string()));
+        response
+    }
+
+    fn not_found(host: &str) -> Self {
+        let mut response = Response::new(host, Status::NotFound, ContentType::HTML);
+        response.set_body(Body::Text("<h1>404 Not Found</h1>".to_string()));
+        response
+    }
+
+    fn internal_server_error(host: &str) -> Self {
+        let mut response = Response::new(host, Status::InternalServerError, ContentType::HTML);
+        response.set_body(Body::Text("<h1>500 Internal Server Error</h1>".to_string()));
+        response
     }
 }
