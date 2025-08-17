@@ -4,7 +4,7 @@ pub enum Status {
     BadRequest,        // 400
     NotFound,          // 404
     InternalServerError, // 500
-    // 可扩展其他状态码...
+    Forbidden,         // 403
 }
 
 impl Status {
@@ -15,6 +15,7 @@ impl Status {
             Self::BadRequest => 400,
             Self::NotFound => 404,
             Self::InternalServerError => 500,
+            Self::Forbidden => 403,
         }
     }
 
@@ -25,6 +26,7 @@ impl Status {
             Self::BadRequest => "Bad Request",
             Self::NotFound => "Not Found",
             Self::InternalServerError => "Internal Server Error",
+            Self::Forbidden => "Forbidden",
         }
     }
 
@@ -35,6 +37,7 @@ impl Status {
             400 => Some(Self::BadRequest),
             404 => Some(Self::NotFound),
             500 => Some(Self::InternalServerError),
+            403 => Some(Self::Forbidden),
             _ => None,
         }
     }
