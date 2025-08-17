@@ -29,7 +29,8 @@ fn main() {
 
     // 初始化router
     let router = router_init();
-
+    
+    // 等待客户端连接
     for stream in listener.incoming() {
         match stream {
             Ok(mut stream) => {
