@@ -4,6 +4,7 @@ use std::net::TcpStream;
 use std::sync::Arc;
 
 use tracing::{Level, error, info};
+use tracing_subscriber::fmt::format;
 use tracing_subscriber::FmtSubscriber;
 
 mod handler;
@@ -19,6 +20,9 @@ use crate::router::Router;
 use crate::threads::thread_pool::ThreadPool;
 
 fn main() {
+
+    const PORT: u16 = 7878;
+
     // 设置日志订阅者
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::INFO)
@@ -29,7 +33,9 @@ fn main() {
     // 创建线程池
     let pool = ThreadPool::new(8);
 
-    let listener = TcpListener::bind("0.0.0.0:7878").unwrap();
+    let listener = TcpListener::bind(format!("0.0.0.0:{PORT}")).unwrap();
+
+    info!("Server run on 0.0.0.0:{PORT}");
 
     // 初始化router
     let router = Arc::new(router_init());
