@@ -39,11 +39,8 @@ fn main() {
         match stream {
             Ok(stream) => {
                 let rp = router.clone();
-                if let Err(e) = pool.execute(move || {
-                    if let Err(e) = handle_connection(stream, rp) {
-                        error!("{e}");
-                    }
-                })
+                if let Err(e) =
+                    pool.execute(move || thread_handle_error(|| handle_connection(stream, rp)))
                 {
                     error!(e);
                 }
@@ -63,6 +60,15 @@ fn router_init() -> Router {
     // Add the static file handler as a catch-all route.
     router.add_route("/*path", RootResourcesHandler);
     router
+}
+
+fn thread_handle_error<F, T>(f: F)
+where
+    F: FnOnce() -> Result<T, Box<dyn std::error::Error>> + Send + 'static,
+{
+    if let Err(e) = f() {
+        error!(e)
+    }
 }
 
 fn handle_connection(
