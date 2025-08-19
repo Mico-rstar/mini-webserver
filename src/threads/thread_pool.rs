@@ -1,7 +1,13 @@
 use std::sync::{Arc, Mutex, mpsc};
 use std::thread;
 
-use tracing::info;
+use tracing::{info, error};
+
+#[derive(Debug, thiserror::Error)]
+pub enum ThreadPoolError {
+    #[error("Missing sender(sender = None)")]
+    MissingSender,
+}
 
 pub struct ThreadPool {
     // threads: Vec<thread::JoinHandle<()>>
@@ -37,8 +43,13 @@ impl ThreadPool {
         F: FnOnce() + Send + 'static,
     {
         let job = Box::new(f);
-        self.sender.as_ref().unwrap().send(job)?;
-        Ok(())
+        if let Some(sender) = self.sender.as_ref() {
+            sender.send(job)?;
+            Ok(())
+        } else {
+            Err(ThreadPoolError::MissingSender.into())
+        }
+        
     }
 }
 
@@ -51,7 +62,9 @@ impl Drop for ThreadPool {
             info!("Shutting down worker {}", worker.id);
 
             if let Some(thread) = worker.thread.take() {
-                thread.join().unwrap();
+                if let Err(e) = thread.join() {
+                    error!("Failed to join worker thread {}: {:?}", worker.id, e);
+                }
             }
         }
     }
