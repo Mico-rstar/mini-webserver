@@ -29,13 +29,13 @@ fn main() {
     // 创建线程池
     let pool = ThreadPool::new(8);
 
-    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+    let listener = TcpListener::bind("0.0.0.0:7878").unwrap();
 
     // 初始化router
     let router = Arc::new(router_init());
 
     // 等待客户端连接
-    for stream in listener.incoming().take(2) {
+    for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
                 let rp = router.clone();
