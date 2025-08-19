@@ -35,7 +35,7 @@ fn main() {
     let router = Arc::new(router_init());
 
     // 等待客户端连接
-    for stream in listener.incoming().take(2) {
+    for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
                 let rp = router.clone();
