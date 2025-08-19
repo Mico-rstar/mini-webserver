@@ -35,15 +35,18 @@ fn main() {
     let router = Arc::new(router_init());
 
     // 等待客户端连接
-    for stream in listener.incoming() {
+    for stream in listener.incoming().take(2) {
         match stream {
             Ok(stream) => {
                 let rp = router.clone();
-                pool.execute(move || {
+                if let Err(e) = pool.execute(move || {
                     if let Err(e) = handle_connection(stream, rp) {
                         error!("{e}");
                     }
                 })
+                {
+                    error!(e);
+                }
             }
             Err(e) => {
                 error!("{e}");
